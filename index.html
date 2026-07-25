@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎺 Sophie's Trumpet Practice Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header>
+    <div class="app-title">🎺 Sophie's Practice Tracker</div>
+    <div class="subtitle">Track your trumpet sessions &amp; reach your goals! 🌟</div>
+    <div class="star-row">🌸 ⭐ 🎵 ⭐ 🌸</div>
+  </header>
+
+  <main>
+
+    <!-- ── Live Timer ── -->
+    <section class="card card-timer" aria-label="Live practice timer">
+      <h2>⏱️ Practice Timer</h2>
+
+      <div id="timer-display" class="timer-display" aria-live="polite">00:00</div>
+
+      <div class="timer-controls">
+        <button id="btn-start" class="btn btn-start">▶ Start</button>
+        <button id="btn-stop"  class="btn btn-stop"  disabled>⏸ Stop</button>
+        <button id="btn-reset" class="btn btn-reset">↺ Reset</button>
+        <button id="btn-save"  class="btn btn-save"  disabled>💾 Save Session</button>
+      </div>
+
+      <div class="timer-note">
+        <input type="text" id="timer-note" maxlength="120"
+               placeholder="Add a note, e.g. Played Mary Had a Little Lamb 🎵" />
+      </div>
+    </section>
+
+    <!-- ── Add Past Session ── -->
+    <section class="card card-add" aria-label="Add a past practice session">
+      <h2>✏️ Add a Past Session</h2>
+      <p style="font-size:0.88rem; color:var(--purple-dark); margin-bottom:0.9rem; font-weight:600;">
+        Forgot to track a session? No worries — add it here! 💜
+      </p>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="add-date">📅 Date</label>
+          <input type="date" id="add-date" max="" />
+        </div>
+
+        <div class="form-group">
+          <label for="add-minutes">⏳ Duration (minutes)</label>
+          <input type="number" id="add-minutes" min="1" max="600" placeholder="e.g. 20" />
+        </div>
+
+        <div class="form-group full">
+          <label for="add-note">📝 Notes (optional)</label>
+          <textarea id="add-note" maxlength="200"
+                    placeholder="What did you practice today? 🎶"></textarea>
+        </div>
+      </div>
+
+      <button id="btn-add-session" class="btn btn-add">✨ Add Session</button>
+    </section>
+
+    <!-- ── Stats ── -->
+    <section class="card card-stats" aria-label="Practice statistics">
+      <h2>📊 My Stats</h2>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div id="stat-total" class="stat-value">—</div>
+          <div class="stat-label">Total Practice</div>
+        </div>
+        <div class="stat-box">
+          <div id="stat-sessions" class="stat-value">0</div>
+          <div class="stat-label">Sessions</div>
+        </div>
+        <div class="stat-box">
+          <div id="stat-avg" class="stat-value">—</div>
+          <div class="stat-label">Avg. per Session</div>
+        </div>
+        <div class="stat-box">
+          <div id="stat-streak" class="stat-value">—</div>
+          <div class="stat-label">Day Streak</div>
+        </div>
+      </div>
+
+      <!-- Weekly goal -->
+      <div class="goal-section">
+        <div class="goal-label">
+          <span>🎯 Weekly Goal</span>
+          <span>
+            <input type="number" id="goal-input" min="1" max="600"
+                   style="width:54px; border:2px solid var(--pink); border-radius:8px;
+                          padding:0.1rem 0.35rem; font-size:0.85rem; font-weight:700;
+                          color:var(--text); outline:none; background:var(--pink-light);"
+                   title="Set your weekly practice goal in minutes" />
+            min/week
+          </span>
+          <span id="progress-pct">0%</span>
+        </div>
+        <div class="progress-bar-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+             aria-valuenow="0" aria-label="Weekly practice goal progress">
+          <div id="progress-fill" class="progress-bar-fill" style="width:0%"></div>
+        </div>
+        <div id="goal-message" class="goal-message"></div>
+      </div>
+    </section>
+
+    <!-- ── History ── -->
+    <section class="card card-history" aria-label="Practice session history">
+      <h2>🗒️ Practice History</h2>
+      <ul id="history-list" class="history-list">
+        <li class="empty-state">No sessions yet — start practicing! 🎺</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+  <script>
+    // Set the max date for the "add past session" date picker to today
+    document.getElementById('add-date').max = new Date().toISOString().slice(0, 10);
+  </script>
+
+</body>
+</html>
