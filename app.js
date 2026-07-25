@@ -30,6 +30,12 @@ function saveWeeklyGoal(minutes) {
 
 // ── Date helpers ─────────────────────────────────────────────────────────────
 
+/** Convert a date input value (YYYY-MM-DD) to an ISO string at local noon. */
+function parseDateInputToISO(dateVal) {
+  const [y, mo, d] = dateVal.split('-').map(Number);
+  return new Date(y, mo - 1, d, 12, 0, 0).toISOString();
+}
+
 function startOfWeek(date) {
   const d = new Date(date);
   const day = d.getDay(); // 0=Sun
@@ -177,7 +183,7 @@ function addManualSession() {
 
   const session = {
     id:      Date.now(),
-    date:    (() => { const [y, mo, d] = dateVal.split('-').map(Number); return new Date(y, mo - 1, d, 12, 0, 0).toISOString(); })(),
+    date:    parseDateInputToISO(dateVal),
     seconds: minutesVal * 60,
     note:    noteVal,
     source:  'manual',
@@ -343,7 +349,12 @@ goalInput.addEventListener('change', () => {
 
 // Allow pressing Enter in the manual form
 addMinutes.addEventListener('keydown', e => { if (e.key === 'Enter') addManualSession(); });
-addNote.addEventListener('keydown',    e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addManualSession(); } });
+addNote.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    addManualSession();
+  }
+});
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
