@@ -177,7 +177,7 @@ function addManualSession() {
 
   const session = {
     id:      Date.now(),
-    date:    new Date(dateVal + 'T12:00:00').toISOString(),
+    date:    (() => { const [y, mo, d] = dateVal.split('-').map(Number); return new Date(y, mo - 1, d, 12, 0, 0).toISOString(); })(),
     seconds: minutesVal * 60,
     note:    noteVal,
     source:  'manual',
@@ -209,11 +209,14 @@ function calcStats(sessions) {
   const count         = sessions.length;
   const avgSeconds    = count > 0 ? Math.round(totalSeconds / count) : 0;
 
-  // Streak: consecutive days with at least one session ending today or yesterday
+  // Streak: consecutive days with at least one session ending today or yesterday.
+  // If Sophie hasn't practised today yet, the streak still counts from yesterday.
   const daySet = new Set(sessions.map(s => s.date.slice(0, 10)));
   let streak = 0;
   const today = new Date();
-  for (let i = 0; i < 365; i++) {
+  const todayStr = today.toISOString().slice(0, 10);
+  const startOffset = daySet.has(todayStr) ? 0 : 1;
+  for (let i = startOffset; i < 365; i++) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
     if (daySet.has(d.toISOString().slice(0, 10))) {
