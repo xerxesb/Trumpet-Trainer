@@ -18,12 +18,20 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+html { -webkit-text-size-adjust: 100%; }
+
 body {
   font-family: 'Nunito', 'Segoe UI', sans-serif;
   background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 50%, #e8eaf6 100%);
   min-height: 100vh;
   color: var(--text);
-  padding-bottom: 3rem;
+  padding-bottom: max(3rem, env(safe-area-inset-bottom));
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Touch-friendly: no double-tap zoom delay on tappable controls */
+.btn, .btn-delete, input, textarea, .history-item {
+  touch-action: manipulation;
 }
 
 /* ── Header ── */
@@ -145,7 +153,7 @@ main {
   padding: 0.55rem 1rem;
   border: 2px solid var(--pink);
   border-radius: 12px;
-  font-size: 0.95rem;
+  font-size: 16px; /* 16px keeps iOS/iPadOS from auto-zooming on focus */
   outline: none;
   font-family: inherit;
   color: var(--text);
@@ -182,7 +190,7 @@ main {
   padding: 0.55rem 0.9rem;
   border: 2px solid var(--purple);
   border-radius: 12px;
-  font-size: 0.95rem;
+  font-size: 16px; /* 16px keeps iOS/iPadOS from auto-zooming on focus */
   font-family: inherit;
   color: var(--text);
   outline: none;

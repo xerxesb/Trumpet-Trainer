@@ -36,6 +36,18 @@ function parseDateInputToISO(dateVal) {
   return new Date(y, mo - 1, d, 12, 0, 0).toISOString();
 }
 
+/**
+ * Local YYYY-MM-DD key for a date. Using the local calendar day (not UTC)
+ * keeps the streak correct regardless of the browser's timezone.
+ */
+function localDayKey(date) {
+  const d = new Date(date);
+  const y = d.getFullYear();
+  const mo = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${mo}-${day}`;
+}
+
 function startOfWeek(date) {
   const d = new Date(date);
   const day = d.getDay(); // 0=Sun
@@ -73,10 +85,23 @@ function formatTimerDisplay(totalSeconds) {
 }
 
 // ── Timer state ──────────────────────────────────────────────────────────────
+// Elapsed time is derived from real wall-clock timestamps rather than a
+// per-second counter. A plain `setInterval` counter under-counts whenever the
+// tab is backgrounded or the iPad screen locks (browsers throttle timers), so
+// we bank completed run-segments and measure the live segment from Date.now().
 
 let timerInterval = null;
-let elapsedSeconds = 0;
 let timerRunning = false;
+let accumulatedSeconds = 0;   // seconds banked from previous run segments
+let segmentStart = null;      // Date.now() when the current segment started
+
+function currentElapsedSeconds() {
+  let secs = accumulatedSeconds;
+  if (timerRunning && segmentStart !== null) {
+    secs += Math.floor((Date.now() - segmentStart) / 1000);
+  }
+  return secs;
+}
 
 // ── DOM references ───────────────────────────────────────────────────────────
 
@@ -118,34 +143,38 @@ function showToast(msg) {
 // ── Timer logic ───────────────────────────────────────────────────────────────
 
 function updateTimerDisplay() {
-  timerDisplay.textContent = formatTimerDisplay(elapsedSeconds);
+  timerDisplay.textContent = formatTimerDisplay(currentElapsedSeconds());
 }
 
 function startTimer() {
   if (timerRunning) return;
   timerRunning = true;
+  segmentStart = Date.now();
   btnStart.disabled = true;
   btnStop.disabled  = false;
   btnSave.disabled  = true;
 
-  timerInterval = setInterval(() => {
-    elapsedSeconds++;
-    updateTimerDisplay();
-  }, 1000);
+  updateTimerDisplay();
+  // Refresh 4x/second so the display re-syncs promptly after the tab wakes.
+  timerInterval = setInterval(updateTimerDisplay, 250);
 }
 
 function stopTimer() {
   if (!timerRunning) return;
+  accumulatedSeconds = currentElapsedSeconds();
   timerRunning = false;
+  segmentStart = null;
   clearInterval(timerInterval);
+  updateTimerDisplay();
   btnStart.disabled = false;
   btnStop.disabled  = true;
-  btnSave.disabled  = elapsedSeconds === 0;
+  btnSave.disabled  = accumulatedSeconds === 0;
 }
 
 function resetTimer() {
   stopTimer();
-  elapsedSeconds = 0;
+  accumulatedSeconds = 0;
+  segmentStart = null;
   updateTimerDisplay();
   btnSave.disabled  = true;
   btnStart.disabled = false;
@@ -154,6 +183,8 @@ function resetTimer() {
 }
 
 function saveTimerSession() {
+  stopTimer();
+  const elapsedSeconds = currentElapsedSeconds();
   if (elapsedSeconds === 0) return;
   const session = {
     id:        Date.now(),
@@ -217,15 +248,15 @@ function calcStats(sessions) {
 
   // Streak: consecutive days with at least one session ending today or yesterday.
   // If Sophie hasn't practised today yet, the streak still counts from yesterday.
-  const daySet = new Set(sessions.map(s => s.date.slice(0, 10)));
+  // Everything is compared on the local calendar day so timezones don't break it.
+  const daySet = new Set(sessions.map(s => localDayKey(s.date)));
   let streak = 0;
   const today = new Date();
-  const todayStr = today.toISOString().slice(0, 10);
-  const startOffset = daySet.has(todayStr) ? 0 : 1;
+  const startOffset = daySet.has(localDayKey(today)) ? 0 : 1;
   for (let i = startOffset; i < 365; i++) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    if (daySet.has(d.toISOString().slice(0, 10))) {
+    if (daySet.has(localDayKey(d))) {
       streak++;
     } else {
       break;
@@ -334,7 +365,9 @@ historyList.addEventListener('click', e => {
   const btn = e.target.closest('.btn-delete');
   if (btn) {
     const id = parseInt(btn.dataset.id, 10);
-    deleteSession(id);
+    if (confirm('Remove this practice session? 🎺')) {
+      deleteSession(id);
+    }
   }
 });
 

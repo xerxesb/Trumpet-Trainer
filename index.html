@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f48fb1" />
+  <!-- Let Sophie add this to her iPad Home Screen and run it full-screen -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Trumpet 🎺" />
   <title>🎺 Sophie's Trumpet Practice Tracker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -96,8 +101,8 @@
           <span>🎯 Weekly Goal</span>
           <span>
             <input type="number" id="goal-input" min="1" max="600"
-                   style="width:54px; border:2px solid var(--pink); border-radius:8px;
-                          padding:0.1rem 0.35rem; font-size:0.85rem; font-weight:700;
+                   style="width:60px; border:2px solid var(--pink); border-radius:8px;
+                          padding:0.1rem 0.35rem; font-size:16px; font-weight:700;
                           color:var(--text); outline:none; background:var(--pink-light);"
                    title="Set your weekly practice goal in minutes" />
             min/week
